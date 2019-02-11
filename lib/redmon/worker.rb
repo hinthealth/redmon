@@ -2,6 +2,15 @@ module Redmon
   class Worker
     include Redmon::Redis
 
+    attr_reader :redis_instance
+
+    def initialize(redis_instance = nil)
+      @redis_instance = redis_instance || default_redis_instance
+
+      fail "Invalid redis instance: #{redis_instance}" unless redis_instance_valid?
+      fail "Invalid redis instance (#{redis_instance}) url: #{redis_url}" unless redis_instance_url_valid?
+    end
+
     def run!
       EM::PeriodicTimer.new(interval) {
         record_stats

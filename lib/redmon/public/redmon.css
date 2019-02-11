@@ -20,6 +20,9 @@ body {
   -moz-opacity: 1;
   opacity: 1;
 }
+.alert-message {
+  text-align: center;
+}
 
 /* The white background content wrapper */
 .content {

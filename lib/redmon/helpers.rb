@@ -3,7 +3,9 @@ module Redmon
     include Redmon::Redis
 
     def prompt
-      "#{redis_url.gsub('://', ' ')}>"
+      return unless anonymized_redis_url
+
+      "#{anonymized_redis_url.gsub('://', ' ')}>"
     end
 
     def poll_interval

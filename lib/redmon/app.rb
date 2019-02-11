@@ -55,5 +55,10 @@ module Redmon
       redis.zrange(stats_key, count, -1).to_json
     end
 
+    helpers do
+      def redis_instance
+        params[:redis_instance] || default_redis_instance
+      end
+    end
   end
 end

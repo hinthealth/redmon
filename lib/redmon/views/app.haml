@@ -29,152 +29,179 @@
             %li#config
               %a Configuration
           .pull-right
-            %a.brand #{redis_url}
-            .btns
-              %button#flush-btn.btn.danger Flush DB
-              %button#reset-btn.btn.primary Reset Statistics
+            %a.brand
+              %select#instance-select
+                - Redmon.config.redis_instances.each do |instance_name, instance_url|
+                  %option{ value: instance_name, selected: redis_instance.to_s == instance_name.to_s }
+                    #{instance_name} [#{anonymize_redis_url(instance_url)}]
 
-    .container.viewport
-      .dashboard
-        .content
-          .page-header
-            %h1 Dashboard
-          .row
-            .span15
-              .row
-                .span15
-                  .widget
-                    .headbar
-                      %h2 Memory Usage
-                    #memory-container.chart-container
-                      #memory-chart.chart
-                        %svg
-              .row
-                .span15
-                  .widget
-                    .headbar
-                      %h2 Keyspace
-                    #keyspace-container.chart-container
-                      #keyspace-chart.chart
-                        %svg
-              .row
-                .span15
-                  .widget
-                    .headbar
-                      %h2 Slow Log
-                    %div{:style => 'height:225px;overflow-y:scroll;'}
-                      %table#slow-tbl.condensed-table
-                        %tbody
+            - if redis_instance_valid? && redis_instance_url_valid?
+              .btns
+                %button#flush-btn.btn.danger Flush DB
+                %button#reset-btn.btn.primary Reset Statistics
 
-            .span6
+    - unless redis_instance_valid?
+      .container.viewport
+        .alert-message.danger
+          Invalid redis instance: #{redis_instance}
+
+    - if redis_instance_valid? && !redis_instance_url_valid?
+      .container.viewport
+        .dashboard
+          .content
+            .alert-message.danger
+              Invalid redis instance (#{redis_instance}) url: #{redis_url}
+
+    - if redis_instance_valid? && redis_instance_url_valid?
+      .container.viewport
+        .dashboard
+          .content
+            .page-header
+              %h1 Dashboard
+            .row
+              .span15
+                .row
+                  .span15
+                    .widget
+                      .headbar
+                        %h2 Memory Usage
+                      #memory-container.chart-container
+                        #memory-chart.chart
+                          %svg
+                .row
+                  .span15
+                    .widget
+                      .headbar
+                        %h2 Keyspace
+                      #keyspace-container.chart-container
+                        #keyspace-chart.chart
+                          %svg
+                .row
+                  .span15
+                    .widget
+                      .headbar
+                        %h2 Slow Log
+                      %div{:style => 'height:225px;overflow-y:scroll;'}
+                        %table#slow-tbl.condensed-table
+                          %tbody
+
+              .span6
+                .widget
+                  .headbar
+                    %h2 Info
+                  %table#info-tbl.condensed-table
+                    %tbody
+                      %tr
+                        %td{:style => 'width: 65%'} Version
+                        %td#redis_version
+                      %tr
+                        %td Role
+                        %td#role
+                      %tr
+                        %td Uptime Days
+                        %td#uptime_in_days
+                      %tr
+                        %td Memory Used
+                        %td#used_memory_human
+                      %tr
+                        %td Memory Peak
+                        %td#used_memory_peak_human
+                      %tr
+                        %td Memory Fragmentation Ratio
+                        %td#mem_fragmentation_ratio
+                      %tr
+                        %td DB Size (Keys)
+                        %td#dbsize{:data => {:type => 'number'}}
+                      %tr
+                        %td Expired Keys
+                        %td#expired_keys{:data => {:type => 'number'}}
+                      %tr
+                        %td Evicted Keys
+                        %td#evicted_keys{:data => {:type => 'number'}}
+                      %tr
+                        %td Keyspace Hits
+                        %td#keyspace_hits{:data => {:type => 'number'}}
+                      %tr
+                        %td Keyspace Misses
+                        %td#keyspace_misses{:data => {:type => 'number'}}
+                      %tr
+                        %td Pub/Sub Channels
+                        %td#pubsub_channels{:data => {:type => 'number'}}
+                      %tr
+                        %td Pub/Sub Patterns
+                        %td#pubsub_patterns{:data => {:type => 'number'}}
+                      %tr
+                        %td Total Connections Received
+                        %td#total_connections_received{:data => {:type => 'number'}}
+                      %tr
+                        %td Total Commands Processed
+                        %td#total_commands_processed{:data => {:type => 'number'}}
+                      %tr
+                        %td Blocked Clients
+                        %td#blocked_clients{:data => {:type => 'number'}}
+                      %tr
+                        %td Connected Slaves
+                        %td#connected_slaves{:data => {:type => 'number'}}
+                      %tr
+                        %td Last Save
+                        %td#last_save_time{:data => {:type => 'date'}}
+                      %tr
+                        %td Changes Since Last Save
+                        %td#changes_since_last_save{:data => {:type => 'number'}}
+                      %tr
+                        %td AOF Enabled
+                        %td#aof_enabled
+                      %tr
+                        %td VM Enabled
+                        %td#vm_enabled
+
+        .cli.hidden
+          .content
+            .page-header
+              %h1 Command Line Interface
+            .row
+              .span21{:style => 'height:620px'}
+                #terminal
+
+        .config.hidden
+          .content
+            .page-header
+              %h1 Configuration
               .widget
                 .headbar
-                  %h2 Info
-                %table#info-tbl.condensed-table
+                  %h2 Parameters
+                %table#config-table.condensed-table
                   %tbody
+                  - config.each do |k,v|
                     %tr
-                      %td{:style => 'width: 65%'} Version
-                      %td#redis_version
-                    %tr
-                      %td Role
-                      %td#role
-                    %tr
-                      %td Uptime Days
-                      %td#uptime_in_days
-                    %tr
-                      %td Memory Used
-                      %td#used_memory_human
-                    %tr
-                      %td Memory Peak
-                      %td#used_memory_peak_human
-                    %tr
-                      %td Memory Fragmentation Ratio
-                      %td#mem_fragmentation_ratio
-                    %tr
-                      %td DB Size (Keys)
-                      %td#dbsize{:data => {:type => 'number'}}
-                    %tr
-                      %td Expired Keys
-                      %td#expired_keys{:data => {:type => 'number'}}
-                    %tr
-                      %td Evicted Keys
-                      %td#evicted_keys{:data => {:type => 'number'}}
-                    %tr
-                      %td Keyspace Hits
-                      %td#keyspace_hits{:data => {:type => 'number'}}
-                    %tr
-                      %td Keyspace Misses
-                      %td#keyspace_misses{:data => {:type => 'number'}}
-                    %tr
-                      %td Pub/Sub Channels
-                      %td#pubsub_channels{:data => {:type => 'number'}}
-                    %tr
-                      %td Pub/Sub Patterns
-                      %td#pubsub_patterns{:data => {:type => 'number'}}
-                    %tr
-                      %td Total Connections Received
-                      %td#total_connections_received{:data => {:type => 'number'}}
-                    %tr
-                      %td Total Commands Processed
-                      %td#total_commands_processed{:data => {:type => 'number'}}
-                    %tr
-                      %td Blocked Clients
-                      %td#blocked_clients{:data => {:type => 'number'}}
-                    %tr
-                      %td Connected Slaves
-                      %td#connected_slaves{:data => {:type => 'number'}}
-                    %tr
-                      %td Last Save
-                      %td#last_save_time{:data => {:type => 'date'}}
-                    %tr
-                      %td Changes Since Last Save
-                      %td#changes_since_last_save{:data => {:type => 'number'}}
-                    %tr
-                      %td AOF Enabled
-                      %td#aof_enabled
-                    %tr
-                      %td VM Enabled
-                      %td#vm_enabled
+                      %td{:style => 'width: 20%'}= k
+                      %td
+                        .editable{:id => "#{k}"}= v
 
-      .cli.hidden
-        .content
-          .page-header
-            %h1 Command Line Interface
-          .row
-            .span21{:style => 'height:620px'}
-              #terminal
-
-      .config.hidden
-        .content
-          .page-header
-            %h1 Configuration
-            .widget
-              .headbar
-                %h2 Parameters
-              %table#config-table.condensed-table
-                %tbody
-                - config.each do |k,v|
-                  %tr
-                    %td{:style => 'width: 20%'}= k
-                    %td
-                      .editable{:id => "#{k}"}= v
-
-    #flush-confirm.modal.hide
-      .modal-header
-        %a.close x
-        %h3 Flush DB
-      .modal-body
-        %p This action will, without a doubt, delete all the keys of the redis server.
-      .modal-footer
-        %button#flush-cancel-btn.btn.secondary Well On Second Thought
-        %button#flush-confirm-btn.btn.danger Just Do It Already!
+      #flush-confirm.modal.hide
+        .modal-header
+          %a.close x
+          %h3 Flush DB
+        .modal-body
+          %p This action will, without a doubt, delete all the keys of the redis server.
+        .modal-footer
+          %button#flush-cancel-btn.btn.secondary Well On Second Thought
+          %button#flush-confirm-btn.btn.danger Just Do It Already!
 
 :javascript
-  $(document).ready(function() {
-    Redmon.init({
-      pollInterval : #{poll_interval},
-      numSamples   : #{num_samples_to_request},
-      cliPrompt    : '#{prompt}',
-      absoluteUrl  : '#{absolute_url}'
-    });
+  $('#instance-select').change(function() {
+    var absoluteUrl = '#{absolute_url}';
+    window.location = absoluteUrl + '?redis_instance=' + $(this).val();
   });
+
+- if redis_instance_valid? && redis_instance_url_valid?
+  :javascript
+    $(document).ready(function() {
+      Redmon.init({
+        pollInterval  : #{poll_interval},
+        numSamples    : #{num_samples_to_request},
+        cliPrompt     : '#{prompt}',
+        absoluteUrl   : '#{absolute_url}',
+        redisInstance : '#{redis_instance}'
+      });
+    });

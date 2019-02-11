@@ -15,19 +15,45 @@ module Redmon
     ]
 
     def redis
-      @redis ||= ::Redis.connect(:url => Redmon.config.redis_url)
+      @redis ||= ::Redis.new(url: redis_url)
+    end
+
+    def redis_url
+      Redmon.config.redis_instances[redis_instance.to_sym]
+    end
+
+    def redis_instance_valid?
+      Redmon.config.redis_instances.key?(redis_instance.to_sym)
+    end
+
+    def redis_instance_url_valid?
+      redis_url.present?
+    end
+
+    def redis_instance
+      default_redis_instance
+    end
+
+    def default_redis_instance
+      Redmon.config.redis_instances.keys.first
     end
 
     def ns
       Redmon.config.namespace
     end
 
-    def redis_url
-      @redis_url ||= Redmon.config.redis_url.gsub(/\w*:\w*@/, '')
+    def anonymize_redis_url(url)
+      return unless url
+
+      url.gsub(/\w*:\w*@/, '')
+    end
+
+    def anonymized_redis_url
+      @anonymized_redis_url ||= anonymize_redis_url(redis_url)
     end
 
     def redis_host
-      redis_url.gsub('redis://', '')
+      anonymized_redis_url.gsub('redis://', '')
     end
 
     def config
@@ -55,7 +81,7 @@ module Redmon
     end
 
     def connection_refused
-      "Could not connect to Redis at #{redis_url.gsub(/\w*:\/\//, '')}: Connection refused"
+      "Could not connect to Redis at #{anonymized_redis_url.gsub(/\w*:\/\//, '')}: Connection refused"
     end
 
     def stats_key

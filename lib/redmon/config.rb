@@ -9,15 +9,16 @@ module Redmon
 
   class Config
     DEFAULTS = {
-      :namespace     => 'redmon',
-      :redis_url     => 'redis://127.0.0.1:6379',
-      :base_path     => '',
-      :app           => true,
-      :worker        => true,
-      :web_interface => ['0.0.0.0', 4567],
-      :poll_interval => 10,
-      :data_lifespan => 30,
-      :secure        => false
+      namespace:      'redmon',
+      redis_url:      'redis://127.0.0.1:6379',
+      redis_instances: nil,
+      base_path:       '',
+      app:             true,
+      worker:          true,
+      web_interface:   ['0.0.0.0', 4567],
+      poll_interval:   10,
+      data_lifespan:   30,
+      secure:          false
     }
 
     attr_accessor(*DEFAULTS.keys)
@@ -30,5 +31,8 @@ module Redmon
       opts.each { |k,v| send("#{k}=", v) if respond_to? k }
     end
 
+    def redis_instances
+      @redis_instances ||= { default: redis_url }
+    end
   end
 end
