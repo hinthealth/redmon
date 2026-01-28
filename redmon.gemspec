@@ -23,6 +23,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rack-test'
   s.add_development_dependency 'rspec'
   s.add_development_dependency 'rake'
+  s.add_development_dependency 'thin'
 
   s.add_dependency 'sinatra'
   s.add_dependency 'hiredis'
@@ -31,7 +32,6 @@ Gem::Specification.new do |s|
   s.add_dependency 'i18n'
   s.add_dependency 'haml'
   s.add_dependency 'rack'
-  s.add_dependency 'thin'
   s.add_dependency 'mixlib-cli'
   s.add_dependency 'json'
 end

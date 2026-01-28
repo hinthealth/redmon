@@ -26,17 +26,22 @@ module Redmon
   end
 
   def start_app
-    require 'thin'
-    base_path = config.base_path
-    Thin::Server.start(*config.web_interface, signals: false) do
-      app = Redmon::App.new
-      map base_path do
-        run app
+    begin
+      require 'thin'
+      base_path = config.base_path
+      Thin::Server.start(*config.web_interface, signals: false) do
+        app = Redmon::App.new
+        map base_path do
+          run app
+        end
       end
+      log "listening on http://#{config.web_interface.join(':')}#{base_path}"
+    rescue LoadError
+      log "Thin not available. Please mount Redmon::App in your config.ru or install thin gem."
+      log "Example: mount Redmon::App => '/redmon'"
+    rescue Exception => e
+      log "Can't start Redmon::App. port in use? Error: #{e}"
     end
-    log "listening on http://#{config.web_interface.join(':')}#{base_path}"
-  rescue Exception => e
-    log "Can't start Redmon::App. port in use? Error: #{e}"
   end
 
   def start_worker
