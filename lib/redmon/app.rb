@@ -11,7 +11,8 @@ module Redmon
     set :views, Proc.new { File.join(root, "./views") }
 
     use Rack::Static, {
-      :urls => [/\.css$/, /\.js$/],
+      # Rack >= 3.2 requires string path prefixes here; regexp urls raise at boot
+      :urls => ['/redmon.css', '/redmon.js', '/vendor'],
       :root => "#{root}/public",
       :cache_control => 'public, max-age=3600'
     }
